@@ -1,0 +1,46 @@
+services:
+  backend:
+    image: bookingmachine_backend
+    build:
+      context: ./bookingmachine-backend
+      dockerfile: Dockerfile
+    environment:
+      PORT: ${BACKEND_PORT}
+      SHOW_SQL: ${SHOW_SQL}
+    ports:
+      - 127.0.0.1:${BACKEND_PORT}:${BACKEND_PORT}
+    volumes:
+      - ${DB_FILE_PATH}:/app/db/booking.db
+      - ${SQLEAN_LIB_FOLDER_PATH}:/app/sqlean
+  
+  frontend:
+    depends_on:
+      - backend
+    image: bookingmachine_frontend
+    build:
+      context: ./bookingmachine-frontend
+      dockerfile: Dockerfile
+      args:
+        NGINX_HOST: ${NGINX_HOST}  
+        NGINX_PORT: ${NGINX_PORT}
+    environment:
+      PORT: ${FRONTEND_PORT}
+    ports:
+      - 127.0.0.1:${FRONTEND_PORT}:${FRONTEND_PORT}
+    volumes:
+      - ./bookingmachine-frontend/default.conf.template:/etc/nginx/templates/default.conf.template
+  
+  nginx:
+    image: nginx:alpine
+    ports:
+      - ${NGINX_HOST}:${NGINX_PORT}:${NGINX_PORT}
+    volumes:
+      - ./default.conf.template:/etc/nginx/templates/default.conf.template
+    depends_on:
+      - backend
+      - frontend
+    environment:
+      NGINX_HOST: ${NGINX_HOST}
+      NGINX_PORT: ${NGINX_PORT}
+      BACKEND_PORT: ${BACKEND_PORT}
+      FRONTEND_PORT: ${FRONTEND_PORT}
