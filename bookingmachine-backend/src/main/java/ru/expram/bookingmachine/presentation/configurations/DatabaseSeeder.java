@@ -1,7 +1,6 @@
 package ru.expram.bookingmachine.presentation.configurations;
 
 import net.datafaker.Faker;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
 import ru.expram.bookingmachine.domain.enums.TransportType;

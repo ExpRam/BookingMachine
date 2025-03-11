@@ -14,7 +14,6 @@ import ru.expram.bookingmachine.domain.models.Trip;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @AllArgsConstructor
