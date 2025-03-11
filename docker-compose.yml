@@ -35,11 +35,12 @@ services:
     ports:
       - ${NGINX_HOST}:${NGINX_PORT}:${NGINX_PORT}
     volumes:
-      - ./default.conf.template:/etc/nginx/templates/default.conf.template
+      - ./nginx.conf.template:/etc/nginx/templates/nginx.conf.template
     depends_on:
       - backend
       - frontend
     environment:
+      NGINX_ENVSUBST_OUTPUT_DIR: /etc/nginx
       NGINX_HOST: ${NGINX_HOST}
       NGINX_PORT: ${NGINX_PORT}
       BACKEND_PORT: ${BACKEND_PORT}
