@@ -17,7 +17,7 @@ public interface BookingDAO extends JpaRepository<BookingEntity, Long> {
     Set<Integer> findAllSeatsByTripId(Long tripId);
 
     @Query("SELECT (SELECT COUNT(b.seatNumber) FROM BookingEntity b WHERE b.trip.id = t.id) AS seatCount, t.id FROM TripEntity t WHERE t.id IN :tripIds")
-    List<Integer> findAllSeatsByTripIds(Set<Long> tripIds);
+    List<Integer> findAllSeatsByTripIds(Iterable<Long> tripIds);
 
     @Transactional
     void deleteByRefundCode(String refundCode);

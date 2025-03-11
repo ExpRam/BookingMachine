@@ -12,5 +12,5 @@ public interface IBookingRepository {
     void deleteBookingByRefundCode(String refundCode);
     boolean existsByEmailAndTripId(String email, Long tripId);
     Set<Integer> findAllOccupiedSeatsByTripId(Long tripId);
-    List<Integer> findAllSeatsByTripIds(Set<Long> tripIds);
+    List<Integer> findAllSeatsByTripIds(Iterable<Long> tripIds);
 }

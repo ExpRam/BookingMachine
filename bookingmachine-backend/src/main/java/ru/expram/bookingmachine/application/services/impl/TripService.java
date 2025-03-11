@@ -28,7 +28,7 @@ public class TripService implements ITripService {
     private final IBookingRepository bookingRepository;
 
     private List<TripExtendedDTO> getTripsWithSeats(List<Trip> trips) {
-        Set<Long> tripIds = trips.stream().map(Trip::getId).collect(Collectors.toSet());
+        List<Long> tripIds = trips.stream().map(Trip::getId).toList();
 
         List<Integer> occupiedSeats = bookingRepository.findAllSeatsByTripIds(tripIds);
 

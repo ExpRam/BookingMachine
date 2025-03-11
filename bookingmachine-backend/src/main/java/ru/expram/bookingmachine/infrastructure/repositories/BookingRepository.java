@@ -46,7 +46,7 @@ public class BookingRepository implements IBookingRepository {
     }
 
     @Override
-    public List<Integer> findAllSeatsByTripIds(Set<Long> tripIds) {
+    public List<Integer> findAllSeatsByTripIds(Iterable<Long> tripIds) {
         return bookingDAO.findAllSeatsByTripIds(tripIds);
     }
 
