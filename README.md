@@ -25,6 +25,9 @@
 * ![NPM](https://img.shields.io/badge/NPM-%23CB3837.svg?style=for-the-badge&logo=npm&logoColor=white)
 * ![Nginx](https://img.shields.io/badge/nginx-%23009639.svg?style=for-the-badge&logo=nginx&logoColor=white)
 
+> UPD: Теперь Trip сортируется по времени в пути, а не по departureTime
+
+
 # Разворачиваем проект через Docker
 
 Вот как можно запустить проект локально (**На компьютере заранее должен быть установлен [Git](https://git-scm.com/), [Docker](https://www.docker.com/) и [Docker Compose](https://docs.docker.com/compose/install/)**):
