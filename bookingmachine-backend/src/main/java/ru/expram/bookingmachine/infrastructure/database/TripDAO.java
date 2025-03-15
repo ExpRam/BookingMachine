@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import ru.expram.bookingmachine.domain.enums.TransportType;
 import ru.expram.bookingmachine.infrastructure.entities.TripEntity;
+import ru.expram.bookingmachine.utils.SortSettings;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,8 +26,7 @@ public interface TripDAO extends JpaRepository<TripEntity, Long> {
             (:departureTime IS NULL OR t.departureTime >= :departureTime) AND
             (:arrivalTime IS NULL OR t.arrivalTime <= :arrivalTime) AND
             (:transportType IS NULL OR r.transportType = :transportType)
-            ORDER BY t.departureTime
-            """)
+        """ + SortSettings.SORT_QUERY)
     List<TripEntity> findTripsByBaseParams(
             String departureCity,
             String arrivalCity,
