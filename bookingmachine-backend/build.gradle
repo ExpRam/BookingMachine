@@ -42,9 +42,13 @@ dependencies {
 	// Faker for db seed
 	implementation 'net.datafaker:datafaker:2.4.2'
 
-	// AutoMapper for DTOs
+	// AutoMapper
 	implementation 'org.mapstruct:mapstruct:1.6.3'
 	annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
+
+	// Cache
+	implementation 'org.springframework.boot:spring-boot-starter-cache'
+	implementation 'com.github.ben-manes.caffeine:caffeine:3.2.0'
 
 	// Test stuff...
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
