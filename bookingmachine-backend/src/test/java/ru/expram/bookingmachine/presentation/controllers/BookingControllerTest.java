@@ -14,6 +14,7 @@ import ru.expram.bookingmachine.application.dtos.delete.RefundBookingRequest;
 import ru.expram.bookingmachine.application.dtos.post.TakeBookingRequest;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(SpringExtension.class)

@@ -3,8 +3,6 @@ package ru.expram.bookingmachine.application.factories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.expram.bookingmachine.application.dtos.post.TakeBookingRequest;
-import ru.expram.bookingmachine.application.exceptions.NoSeatsForTripException;
-import ru.expram.bookingmachine.application.exceptions.SeatAlreadyTakenException;
 import ru.expram.bookingmachine.domain.enums.TransportType;
 import ru.expram.bookingmachine.domain.exceptions.InvalidEmailException;
 import ru.expram.bookingmachine.domain.models.Booking;

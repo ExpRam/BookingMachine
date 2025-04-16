@@ -16,7 +16,6 @@ import ru.expram.bookingmachine.application.exceptions.EmailAlreadyOnTripExcepti
 import ru.expram.bookingmachine.application.exceptions.NoSeatsForTripException;
 import ru.expram.bookingmachine.application.exceptions.SeatAlreadyTakenException;
 import ru.expram.bookingmachine.application.exceptions.TripNotFoundException;
-import ru.expram.bookingmachine.application.factories.BookingFactory;
 import ru.expram.bookingmachine.application.mapper.IBookingDTOMapper;
 import ru.expram.bookingmachine.application.repositories.IBookingRepository;
 import ru.expram.bookingmachine.application.repositories.ITripRepository;

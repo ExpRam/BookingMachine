@@ -18,7 +18,6 @@ import ru.expram.bookingmachine.application.services.impl.TripService;
 import ru.expram.bookingmachine.domain.enums.TransportType;
 import ru.expram.bookingmachine.domain.models.Route;
 import ru.expram.bookingmachine.domain.models.Trip;
-import ru.expram.bookingmachine.infrastructure.database.projections.TripWithOccupiedSeatsProjection;
 
 import java.time.LocalDateTime;
 import java.util.*;
