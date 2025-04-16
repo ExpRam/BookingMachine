@@ -10,6 +10,8 @@ import ru.expram.bookingmachine.application.dtos.delete.RefundBookingResponse;
 import ru.expram.bookingmachine.application.dtos.post.TakeBookingRequest;
 import ru.expram.bookingmachine.application.services.IBookingService;
 
+import java.util.concurrent.CompletableFuture;
+
 @AllArgsConstructor(onConstructor_ = @Autowired)
 @RestController
 @RequestMapping("api/booking")
@@ -18,12 +20,12 @@ public class BookingController {
     private final IBookingService bookingService;
 
     @PostMapping
-    public BookingDTO takeBooking(@Valid @RequestBody TakeBookingRequest request) {
+    public CompletableFuture<BookingDTO> takeBooking(@Valid @RequestBody TakeBookingRequest request) {
         return bookingService.takeBooking(request);
     }
 
     @DeleteMapping
-    public RefundBookingResponse refundBooking(@Valid @RequestBody RefundBookingRequest request) {
+    public CompletableFuture<RefundBookingResponse> refundBooking(@Valid @RequestBody RefundBookingRequest request) {
         return bookingService.refundBooking(request);
     }
 }

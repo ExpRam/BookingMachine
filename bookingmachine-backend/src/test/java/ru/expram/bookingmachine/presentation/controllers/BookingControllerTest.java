@@ -13,8 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.expram.bookingmachine.application.dtos.delete.RefundBookingRequest;
 import ru.expram.bookingmachine.application.dtos.post.TakeBookingRequest;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(SpringExtension.class)
@@ -34,9 +33,13 @@ class BookingControllerTest {
     void takeBooking_ShouldCreateBooking() throws Exception {
         TakeBookingRequest request = new TakeBookingRequest(2L, "Andrey", "Vasilyev", "andrey@test.com", 2);
 
-        mockMvc.perform(post("/api/booking")
+        var resultActions = mockMvc.perform(post("/api/booking")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(resultActions))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"))
                 .andExpect(jsonPath("$.firstName").value("Andrey"))
@@ -60,10 +63,13 @@ class BookingControllerTest {
     void refundBooking_ShouldProcessRefund_WhenValidCode() throws Exception {
         RefundBookingRequest request = new RefundBookingRequest("480305cbe5534b888dbebfeda8507df9");
 
-        mockMvc.perform(delete("/api/booking")
+        var resultActions = mockMvc.perform(delete("/api/booking")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(resultActions)).andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"))
                 .andExpect(jsonPath("$.success").value(true));
     }
@@ -72,9 +78,13 @@ class BookingControllerTest {
     void refundBooking_ShouldReturnFailure_WhenInvalidCode() throws Exception {
         RefundBookingRequest request = new RefundBookingRequest("INVALID_CODE");
 
-        mockMvc.perform(delete("/api/booking")
+        var resultActions = mockMvc.perform(delete("/api/booking")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(resultActions))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(false));
     }

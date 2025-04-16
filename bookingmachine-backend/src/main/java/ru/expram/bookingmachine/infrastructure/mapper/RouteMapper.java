@@ -1,28 +1,15 @@
 package ru.expram.bookingmachine.infrastructure.mapper;
 
-import ru.expram.bookingmachine.application.common.IModelEntityMapper;
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingConstants;
 import ru.expram.bookingmachine.domain.models.Route;
 import ru.expram.bookingmachine.infrastructure.entities.RouteEntity;
 
-public class RouteMapper implements IModelEntityMapper<Route, RouteEntity> {
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = RouteMapper.class)
+public interface RouteMapper {
 
-    @Override
-    public Route mapToModel(RouteEntity entity) {
-        return Route.builder()
-                .id(entity.getId())
-                .departureCity(entity.getDepartureCity())
-                .arrivalCity(entity.getArrivalCity())
-                .transportType(entity.getTransportType())
-                .build();
-    }
+    Route mapToModel(RouteEntity entity);
 
-    @Override
-    public RouteEntity mapToEntity(Route model) {
-        return RouteEntity.builder()
-                .id(model.getId())
-                .departureCity(model.getDepartureCity())
-                .arrivalCity(model.getArrivalCity())
-                .transportType(model.getTransportType())
-                .build();
-    }
+    RouteEntity mapToEntity(Route model);
+
 }

@@ -6,6 +6,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
+import ru.expram.bookingmachine.infrastructure.database.projections.TripWithOccupiedSeatsProjection;
 import ru.expram.bookingmachine.presentation.TestApplicationConfiguration;
 
 import java.util.List;
@@ -57,10 +58,10 @@ class BookingDAOTest {
 
     @Test
     void findAllSeatsByTripIds_ShouldReturnCountOfOccupiedSeatsForEveryId() {
-        List<Integer> occupiedSeats = bookingDAO.findAllSeatsByTripIds(Set.of(1L));
+        List<TripWithOccupiedSeatsProjection> occupiedSeats = bookingDAO.findAllSeatsByTripIds(Set.of(1L));
         assertNotNull(occupiedSeats);
         assertEquals(1, occupiedSeats.size());
-        assertTrue(occupiedSeats.contains(1));
+        assertEquals(1, occupiedSeats.getFirst().getOccupiedSeatsCount());
     }
 
     @Test

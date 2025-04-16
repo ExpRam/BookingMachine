@@ -18,9 +18,12 @@ import ru.expram.bookingmachine.application.services.impl.TripService;
 import ru.expram.bookingmachine.domain.enums.TransportType;
 import ru.expram.bookingmachine.domain.models.Route;
 import ru.expram.bookingmachine.domain.models.Trip;
+import ru.expram.bookingmachine.infrastructure.database.projections.TripWithOccupiedSeatsProjection;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -93,15 +96,16 @@ class TripServiceTest {
     }
 
     @Test
-    void getAllTripsTest() {
+    void getAllTripsTest() throws ExecutionException, InterruptedException {
         List<Trip> trips = Arrays.asList(trip1, trip2);
         List<TripExtendedDTO> tripDTOs = Arrays.asList(tripDTO1, tripDTO2);
         when(tripRepository.getTrips()).thenReturn(trips);
-        when(bookingRepository.findAllSeatsByTripIds(any())).thenReturn(List.of(10, 10));
+        when(bookingRepository.findAllSeatsByTripIds(any())).thenReturn(Map.of(1L, 10, 2L, 10));
         when(tripDTOMapper.toTripExtendedDTO(trip1, 90)).thenReturn(tripDTO1);
         when(tripDTOMapper.toTripExtendedDTO(trip2, 40)).thenReturn(tripDTO2);
 
-        List<TripExtendedDTO> result = tripService.getAllTrips();
+        CompletableFuture<List<TripExtendedDTO>> resultFuture = tripService.getAllTrips();
+        List<TripExtendedDTO> result = resultFuture.get();
 
         assertEquals(2, result.size());
         assertEquals(tripDTOs, result);
@@ -111,14 +115,15 @@ class TripServiceTest {
     }
 
     @Test
-    void getTripsByFilterTest() {
+    void getTripsByFilterTest() throws ExecutionException, InterruptedException {
         BaseSearchRequest request = mock(BaseSearchRequest.class);
         List<Trip> filteredTrips = Collections.singletonList(trip1);
         when(tripRepository.findTripsByBaseParams(request)).thenReturn(filteredTrips);
-        when(bookingRepository.findAllSeatsByTripIds(any())).thenReturn(List.of(10, 10));
+        when(bookingRepository.findAllSeatsByTripIds(any())).thenReturn(Map.of(1L, 10, 2L, 10));
         when(tripDTOMapper.toTripExtendedDTO(trip1, 90)).thenReturn(tripDTO1);
 
-        List<TripExtendedDTO> result = tripService.getTripsByFilter(request);
+        CompletableFuture<List<TripExtendedDTO>> resultFuture = tripService.getTripsByFilter(request);
+        List<TripExtendedDTO> result = resultFuture.get();
 
         assertEquals(1, result.size());
         assertEquals(tripDTO1, result.getFirst());
@@ -128,14 +133,15 @@ class TripServiceTest {
     }
 
     @Test
-    void getGroupedTripsTest() {
+    void getGroupedTripsTest() throws ExecutionException, InterruptedException {
         BaseSearchRequest request = mock(BaseSearchRequest.class);
         when(tripRepository.findTripsByBaseParams(request)).thenReturn(Arrays.asList(trip1, trip2));
-        when(bookingRepository.findAllSeatsByTripIds(any())).thenReturn(List.of(10, 10));
+        when(bookingRepository.findAllSeatsByTripIds(any())).thenReturn(Map.of(1L, 10, 2L, 10));
         when(tripDTOMapper.toTripExtendedDTO(trip1, 90)).thenReturn(tripDTO1);
         when(tripDTOMapper.toTripExtendedDTO(trip2, 40)).thenReturn(tripDTO2);
 
-        HashMap<String, HashMap<String, List<TripExtendedDTO>>> groupedTrips = tripService.getGroupedTrips(request);
+        CompletableFuture<HashMap<String, HashMap<String, List<TripExtendedDTO>>>> groupedTripsFuture = tripService.getGroupedTrips(request);
+        HashMap<String, HashMap<String, List<TripExtendedDTO>>> groupedTrips = groupedTripsFuture.get();
 
         assertEquals(2, groupedTrips.size());
         assertTrue(groupedTrips.containsKey("2025-01-15"));
@@ -161,11 +167,12 @@ class TripServiceTest {
     }
 
     @Test
-    void getAvailableSeats_ShouldReturnAvailableSeats_WhenTripExists() {
+    void getAvailableSeats_ShouldReturnAvailableSeats_WhenTripExists() throws ExecutionException, InterruptedException {
         when(tripRepository.findTripById(1L)).thenReturn(Optional.of(trip1));
         when(bookingRepository.findAllOccupiedSeatsByTripId(1L)).thenReturn(Set.of(1, 2, 3, 4, 5));
 
-        Set<Integer> availableSeats = tripService.getAvailableSeats(1L);
+        CompletableFuture<Set<Integer>> availableSeatsFuture = tripService.getAvailableSeats(1L);
+        Set<Integer> availableSeats = availableSeatsFuture.get();
 
         assertEquals(95, availableSeats.size());
         assertFalse(availableSeats.contains(1));
@@ -185,11 +192,12 @@ class TripServiceTest {
     }
 
     @Test
-    void getTripById_ShouldReturnTrip_WhenTripExists() {
+    void getTripById_ShouldReturnTrip_WhenTripExists() throws ExecutionException, InterruptedException {
         when(tripRepository.findTripById(1L)).thenReturn(Optional.of(trip1));
         when(tripDTOMapper.toTripDTO(trip1)).thenReturn(tripDTO3);
 
-        TripDTO result = tripService.getTripById(1L);
+        CompletableFuture<TripDTO> resultFuture = tripService.getTripById(1L);
+        TripDTO result = resultFuture.get();
 
         assertEquals(tripDTO3, result);
         verify(tripRepository, times(1)).findTripById(1L);

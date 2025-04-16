@@ -6,7 +6,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.expram.bookingmachine.application.common.IModelEntityMapper;
 import ru.expram.bookingmachine.domain.enums.TransportType;
 import ru.expram.bookingmachine.domain.models.Booking;
 import ru.expram.bookingmachine.domain.models.Route;
@@ -14,12 +13,15 @@ import ru.expram.bookingmachine.domain.models.Trip;
 import ru.expram.bookingmachine.domain.valueobjects.Email;
 import ru.expram.bookingmachine.domain.valueobjects.FullName;
 import ru.expram.bookingmachine.infrastructure.database.BookingDAO;
+import ru.expram.bookingmachine.infrastructure.database.projections.TripWithOccupiedSeatsProjection;
 import ru.expram.bookingmachine.infrastructure.entities.BookingEntity;
 import ru.expram.bookingmachine.infrastructure.entities.RouteEntity;
 import ru.expram.bookingmachine.infrastructure.entities.TripEntity;
+import ru.expram.bookingmachine.infrastructure.mapper.BookingMapper;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,7 +34,7 @@ class BookingRepositoryTest {
     private BookingDAO bookingDAO;
 
     @Mock
-    private IModelEntityMapper<Booking, BookingEntity> bookingMapper;
+    private BookingMapper bookingMapper;
 
     @InjectMocks
     private BookingRepository bookingRepository;
@@ -177,13 +179,24 @@ class BookingRepositoryTest {
 
     @Test
     void findAllSeatsByTripIds_ShouldReturnCountOfOccupiedSeatsForEveryId() {
-        when(bookingDAO.findAllSeatsByTripIds(Set.of(1L))).thenReturn(List.of(1));
+        when(bookingDAO.findAllSeatsByTripIds(Set.of(1L))).thenReturn(List.of(new TripWithOccupiedSeatsProjection() {
+            @Override
+            public Long getTripId() {
+                return 1L;
+            }
 
-        List<Integer> occupiedSeats = bookingRepository.findAllSeatsByTripIds(Set.of(1L));
+            @Override
+            public Integer getOccupiedSeatsCount() {
+                return 1;
+            }
+        }));
+
+        Map<Long, Integer> occupiedSeats = bookingRepository.findAllSeatsByTripIds(Set.of(1L));
 
         assertNotNull(occupiedSeats);
         assertEquals(1, occupiedSeats.size());
-        assertTrue(occupiedSeats.contains(1));
+        assertTrue(occupiedSeats.containsKey(1L));
+        assertTrue(occupiedSeats.containsValue(1));
         verify(bookingDAO, times(1)).findAllSeatsByTripIds(Set.of(1L));
     }
 }

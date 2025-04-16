@@ -12,7 +12,12 @@ import ru.expram.bookingmachine.domain.enums.TransportType;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "routes")
+@Table(name = "routes", indexes = {
+        @Index(name = "idx_route_full", columnList = "departureCity,arrivalCity,transportType"),
+        @Index(name = "idx_route_departure_city", columnList = "departureCity"),
+        @Index(name = "idx_route_arrival_city", columnList = "arrivalCity"),
+        @Index(name = "idx_route_transport", columnList = "transportType")
+})
 public class RouteEntity {
 
     @Id

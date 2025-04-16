@@ -23,15 +23,16 @@ public class Trip {
     private Double price;
 
     public int getRandomAvailableSeat(Set<Integer> availableSeats) {
-        final ThreadLocalRandom localRandom = ThreadLocalRandom.current();
-        return (int) availableSeats.toArray()[localRandom.nextInt(availableSeats.size())];
+        return availableSeats.stream()
+                .skip(ThreadLocalRandom.current().nextInt(availableSeats.size()))
+                .findFirst().get();
     }
 
     public Set<Integer> getAvailableSeats(Set<Integer> occupiedSeats) {
-        return IntStream.range(1, this.maxSeats + 1)
+        return IntStream.rangeClosed(1, maxSeats)
                 .filter(seat -> !occupiedSeats.contains(seat))
                 .boxed()
-                .collect(Collectors.toSet());
+                .collect(Collectors.toUnmodifiableSet());
     }
 
 }

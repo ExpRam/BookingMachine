@@ -1,7 +1,7 @@
 package ru.expram.bookingmachine.infrastructure.mapper;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
 import ru.expram.bookingmachine.domain.enums.TransportType;
 import ru.expram.bookingmachine.domain.models.Route;
 import ru.expram.bookingmachine.infrastructure.entities.RouteEntity;
@@ -11,12 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class RouteMapperTest {
 
-    private RouteMapper routeMapper;
-
-    @BeforeEach
-    void setUp() {
-        routeMapper = new RouteMapper();
-    }
+    private RouteMapper routeMapper = Mappers.getMapper(RouteMapper.class);
 
     @Test
     void mapToModel_ShouldMapCorrectly() {

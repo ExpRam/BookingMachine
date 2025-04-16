@@ -11,7 +11,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "bookings")
+@Table(name = "bookings", indexes = {
+        @Index(name = "idx_booking_id", columnList = "id"),
+        @Index(name = "idx_booking_trip", columnList = "trip_id"),
+        @Index(name = "idx_booking_email_trip", columnList = "email,trip_id"),
+        @Index(name = "idx_booking_refund", columnList = "refund_code")
+})
 public class BookingEntity {
 
     @Id

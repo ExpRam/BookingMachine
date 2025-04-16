@@ -1,12 +1,11 @@
 package ru.expram.bookingmachine.infrastructure.repositories;
 
 import lombok.RequiredArgsConstructor;
-import ru.expram.bookingmachine.application.common.IModelEntityMapper;
 import ru.expram.bookingmachine.application.dtos.get.BaseSearchRequest;
 import ru.expram.bookingmachine.application.repositories.ITripRepository;
 import ru.expram.bookingmachine.domain.models.Trip;
 import ru.expram.bookingmachine.infrastructure.database.TripDAO;
-import ru.expram.bookingmachine.infrastructure.entities.TripEntity;
+import ru.expram.bookingmachine.infrastructure.mapper.TripMapper;
 import ru.expram.bookingmachine.utils.TimeUtils;
 
 import java.time.LocalDateTime;
@@ -18,7 +17,7 @@ public class TripRepository implements ITripRepository {
 
     private final TripDAO tripDAO;
 
-    private final IModelEntityMapper<Trip, TripEntity> tripMapper;
+    private final TripMapper tripMapper;
 
     @Override
     public List<Trip> getTrips() {

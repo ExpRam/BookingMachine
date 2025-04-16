@@ -34,7 +34,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<BaseListedSpringException> methodArgumentNotValidExceptionHandler
             (MethodArgumentNotValidException exception, WebRequest request) {
         final List<String> errors = exception.getBindingResult().getFieldErrors()
-                .stream().map(field -> "%s %s".formatted(field.getField(), field.getDefaultMessage())).collect(Collectors.toList());
+                // Only field-level errors are handled
+                .stream().map(field -> String.format("%s %s", field.getField(), field.getDefaultMessage())).collect(Collectors.toList());
         final String path = getPath(request);
 
         final BaseListedSpringException baseSpringException = new BaseListedSpringException(
@@ -46,7 +47,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(baseSpringException, HttpStatus.BAD_REQUEST);
     }
 
-    private String getPath(WebRequest request) {
+    private static String getPath(WebRequest request) {
         return request.getDescription(false).replace("uri=", "");
     }
 }

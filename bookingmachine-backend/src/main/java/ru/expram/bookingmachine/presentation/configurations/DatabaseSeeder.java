@@ -19,8 +19,8 @@ public class DatabaseSeeder implements CommandLineRunner {
 
     private final Faker FAKER = new Faker(Locale.of("ru"));
 
-    private final int COUNT_OF_SEEDED_ROUTES = 200;
-    private final int COUNT_OF_SEEDED_TRIPS = 400;
+    private final int COUNT_OF_SEEDED_ROUTES = 10000;
+    private final int COUNT_OF_SEEDED_TRIPS = 20000;
 
     private final RouteDAO routeDAO;
     private final TripDAO tripDAO;

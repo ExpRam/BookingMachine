@@ -3,10 +3,10 @@ package ru.expram.bookingmachine.infrastructure.mapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.expram.bookingmachine.application.common.IModelEntityMapper;
 import ru.expram.bookingmachine.domain.enums.TransportType;
 import ru.expram.bookingmachine.domain.models.Route;
 import ru.expram.bookingmachine.domain.models.Trip;
@@ -23,10 +23,10 @@ import static org.mockito.Mockito.*;
 class TripMapperTest {
 
     @Mock
-    private IModelEntityMapper<Route, RouteEntity> routeMapper;
+    private RouteMapper routeMapper;
 
     @InjectMocks
-    private TripMapper tripMapper;
+    private TripMapper tripMapper = Mappers.getMapper(TripMapper.class);
 
     private RouteEntity routeEntity;
     private Route route;

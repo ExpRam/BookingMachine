@@ -3,6 +3,7 @@ package ru.expram.bookingmachine.infrastructure.mapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -29,7 +30,7 @@ class BookingMapperTest {
     private TripMapper tripMapper;
 
     @InjectMocks
-    private BookingMapper bookingMapper;
+    private BookingMapper bookingMapper = Mappers.getMapper(BookingMapper.class);
 
     private TripEntity tripEntity;
     private Trip trip;

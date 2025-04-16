@@ -28,6 +28,8 @@ import ru.expram.bookingmachine.domain.valueobjects.FullName;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -89,7 +91,7 @@ class BookingServiceTest {
     }
 
     @Test
-    void takeBooking_ShouldCreateBooking_WhenValidRequest() {
+    void takeBooking_ShouldCreateBooking_WhenValidRequest() throws ExecutionException, InterruptedException {
         TakeBookingRequest request = new TakeBookingRequest(1L, "Andrey", "Vasilyev", "andrey@test.com", 20);
 
         when(tripRepository.findTripById(1L)).thenReturn(Optional.of(trip));
@@ -98,7 +100,8 @@ class BookingServiceTest {
         when(bookingRepository.save(any())).thenReturn(booking);
         when(dtoMapper.toBookingDTO(booking)).thenReturn(bookingDTO);
 
-        BookingDTO result = bookingService.takeBooking(request);
+        CompletableFuture<BookingDTO> resultFuture = bookingService.takeBooking(request);
+        BookingDTO result = resultFuture.get();
 
         assertNotNull(result);
         assertEquals(bookingDTO, result);
@@ -126,26 +129,26 @@ class BookingServiceTest {
     }
 
     @Test
-    void refundBooking_ShouldReturnTrue_WhenRefundCodeExists() {
+    void refundBooking_ShouldReturnTrue_WhenRefundCodeExists() throws ExecutionException, InterruptedException {
         RefundBookingRequest request = new RefundBookingRequest("ABC");
 
         when(bookingRepository.existsByRefundCode("ABC")).thenReturn(true);
 
-        RefundBookingResponse response = bookingService.refundBooking(request);
+        CompletableFuture<RefundBookingResponse> response = bookingService.refundBooking(request);
 
-        assertTrue(response.success());
+        assertTrue(response.get().success());
         verify(bookingRepository, times(1)).deleteBookingByRefundCode("ABC");
     }
 
     @Test
-    void refundBooking_ShouldReturnFalse_WhenRefundCodeDoesNotExist() {
+    void refundBooking_ShouldReturnFalse_WhenRefundCodeDoesNotExist() throws ExecutionException, InterruptedException {
         RefundBookingRequest request = new RefundBookingRequest("INVALID_CODE");
 
         when(bookingRepository.existsByRefundCode("INVALID_CODE")).thenReturn(false);
 
-        RefundBookingResponse response = bookingService.refundBooking(request);
+        CompletableFuture<RefundBookingResponse> response = bookingService.refundBooking(request);
 
-        assertFalse(response.success());
+        assertFalse(response.get().success());
         verify(bookingRepository, never()).deleteBookingByRefundCode(any());
     }
 }

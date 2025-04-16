@@ -1,21 +1,25 @@
 package ru.expram.bookingmachine.infrastructure.repositories;
 
 import lombok.RequiredArgsConstructor;
-import ru.expram.bookingmachine.application.common.IModelEntityMapper;
+import org.springframework.cache.annotation.Cacheable;
 import ru.expram.bookingmachine.application.repositories.IBookingRepository;
 import ru.expram.bookingmachine.domain.models.Booking;
 import ru.expram.bookingmachine.infrastructure.database.BookingDAO;
+import ru.expram.bookingmachine.infrastructure.database.projections.TripWithOccupiedSeatsProjection;
 import ru.expram.bookingmachine.infrastructure.entities.BookingEntity;
+import ru.expram.bookingmachine.infrastructure.mapper.BookingMapper;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class BookingRepository implements IBookingRepository {
 
     private final BookingDAO bookingDAO;
 
-    private final IModelEntityMapper<Booking, BookingEntity> bookingMapper;
+    private final BookingMapper bookingMapper;
 
     @Override
     public Booking save(Booking booking) {
@@ -46,8 +50,15 @@ public class BookingRepository implements IBookingRepository {
     }
 
     @Override
-    public List<Integer> findAllSeatsByTripIds(Iterable<Long> tripIds) {
-        return bookingDAO.findAllSeatsByTripIds(tripIds);
+    @Cacheable(value = "seats", key = "#tripIds")
+    public Map<Long, Integer> findAllSeatsByTripIds(Iterable<Long> tripIds) {
+        // Convert projection to map
+        return bookingDAO.findAllSeatsByTripIds(tripIds)
+                .stream()
+                .collect(Collectors.toMap(
+                        TripWithOccupiedSeatsProjection::getTripId,
+                        TripWithOccupiedSeatsProjection::getOccupiedSeatsCount
+                ));
     }
 
 }

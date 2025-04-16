@@ -1,43 +1,21 @@
 package ru.expram.bookingmachine.infrastructure.mapper;
 
-import lombok.AllArgsConstructor;
-import ru.expram.bookingmachine.application.common.IModelEntityMapper;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingConstants;
 import ru.expram.bookingmachine.domain.models.Booking;
-import ru.expram.bookingmachine.domain.models.Trip;
-import ru.expram.bookingmachine.domain.valueobjects.Email;
-import ru.expram.bookingmachine.domain.valueobjects.FullName;
 import ru.expram.bookingmachine.infrastructure.entities.BookingEntity;
-import ru.expram.bookingmachine.infrastructure.entities.TripEntity;
 
-@AllArgsConstructor
-public class BookingMapper implements IModelEntityMapper<Booking, BookingEntity> {
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = TripMapper.class)
+public interface BookingMapper {
 
-    private final IModelEntityMapper<Trip, TripEntity> tripMapper;
+    @Mapping(source = "entity.firstName", target = "fullName.firstName")
+    @Mapping(source = "entity.lastName", target = "fullName.lastName")
+    @Mapping(source = "entity.email", target = "email.value")
+    Booking mapToModel(BookingEntity entity);
 
-    @Override
-    public Booking mapToModel(BookingEntity entity) {
-        final Email email = new Email(entity.getEmail());
-        final FullName fullName = new FullName(entity.getFirstName(), entity.getLastName());
-
-        return Booking.builder()
-                .id(entity.getId())
-                .trip(tripMapper.mapToModel(entity.getTrip()))
-                .fullName(fullName)
-                .email(email)
-                .seatNumber(entity.getSeatNumber())
-                .refundCode(entity.getRefundCode()).build();
-    }
-
-    @Override
-    public BookingEntity mapToEntity(Booking model) {
-        return BookingEntity.builder()
-                .id(model.getId())
-                .trip(tripMapper.mapToEntity(model.getTrip()))
-                .firstName(model.getFullName().getFirstName())
-                .lastName(model.getFullName().getLastName())
-                .email(model.getEmail().getValue())
-                .seatNumber(model.getSeatNumber())
-                .refundCode(model.getRefundCode())
-                .build();
-    }
+    @Mapping(source = "model.fullName.firstName", target = "firstName")
+    @Mapping(source = "model.fullName.lastName", target = "lastName")
+    @Mapping(source = "model.email.value", target = "email")
+    BookingEntity mapToEntity(Booking model);
 }

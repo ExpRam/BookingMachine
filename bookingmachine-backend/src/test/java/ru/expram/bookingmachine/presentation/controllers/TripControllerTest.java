@@ -9,6 +9,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -24,9 +25,12 @@ class TripControllerTest {
 
     @Test
     void getAllTrips_ShouldReturnAllTrips() throws Exception {
-        var resultActions = mockMvc.perform(get("/api/trips"));
+        var resultActions = mockMvc.perform(get("/api/trips"))
+                .andExpect(request().asyncStarted())
+                .andReturn();
 
-        resultActions.andExpect(status().isOk())
+        mockMvc.perform(asyncDispatch(resultActions))
+                .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"))
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].id").value(1))
@@ -56,9 +60,12 @@ class TripControllerTest {
                         .param("departureCity", "CITY_A")
                         .param("arrivalCity", "CITY_B")
                         .param("transportType", "BUS")
-        );
+        ).andExpect(request().asyncStarted())
+                .andReturn();
 
-        resultActions.andExpect(status().isOk())
+
+
+        mockMvc.perform(asyncDispatch(resultActions)).andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"))
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].id").value(1))
@@ -78,9 +85,11 @@ class TripControllerTest {
                         .param("departureCity", "CITY_A")
                         .param("arrivalCity", "CITY_B")
                         .param("transportType", "BUS")
-        );
+                )
+                .andExpect(request().asyncStarted())
+                .andReturn();
 
-        resultActions.andExpect(status().isOk())
+        mockMvc.perform(asyncDispatch(resultActions))
                 .andExpect(content().contentType("application/json"))
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$.['2025-01-01']").exists())
@@ -97,8 +106,12 @@ class TripControllerTest {
 
     @Test
     void getSeats_ShouldReturnAvailableSeats() throws Exception {
-        mockMvc.perform(get("/api/trips/seats")
+        var resultActions =mockMvc.perform(get("/api/trips/seats")
                         .param("tripId", "1"))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(resultActions))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"))
                 .andExpect(jsonPath("$.length()").value(9));
@@ -116,9 +129,10 @@ class TripControllerTest {
         var resultActions = mockMvc.perform(
                 get("/api/trips/search")
                         .param("tripId", "1")
-        );
+                ).andExpect(request().asyncStarted())
+                .andReturn();
 
-        resultActions.andExpect(status().isOk())
+        mockMvc.perform(asyncDispatch(resultActions)).andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"))
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.route.departureCity").value("CITY_A"))

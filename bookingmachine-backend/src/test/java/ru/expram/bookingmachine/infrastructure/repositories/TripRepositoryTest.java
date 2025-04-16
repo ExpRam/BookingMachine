@@ -6,7 +6,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.expram.bookingmachine.application.common.IModelEntityMapper;
 import ru.expram.bookingmachine.application.dtos.get.BaseSearchRequest;
 import ru.expram.bookingmachine.domain.enums.TransportType;
 import ru.expram.bookingmachine.domain.models.Route;
@@ -14,6 +13,7 @@ import ru.expram.bookingmachine.domain.models.Trip;
 import ru.expram.bookingmachine.infrastructure.database.TripDAO;
 import ru.expram.bookingmachine.infrastructure.entities.RouteEntity;
 import ru.expram.bookingmachine.infrastructure.entities.TripEntity;
+import ru.expram.bookingmachine.infrastructure.mapper.TripMapper;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -31,7 +31,7 @@ class TripRepositoryTest {
     private TripDAO tripDAO;
 
     @Mock
-    private IModelEntityMapper<Trip, TripEntity> tripMapper;
+    private TripMapper tripMapper;
 
     @InjectMocks
     private TripRepository tripRepository;

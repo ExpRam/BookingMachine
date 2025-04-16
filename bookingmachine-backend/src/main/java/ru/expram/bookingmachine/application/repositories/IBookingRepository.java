@@ -2,7 +2,7 @@ package ru.expram.bookingmachine.application.repositories;
 
 import ru.expram.bookingmachine.domain.models.Booking;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public interface IBookingRepository {
@@ -12,5 +12,5 @@ public interface IBookingRepository {
     void deleteBookingByRefundCode(String refundCode);
     boolean existsByEmailAndTripId(String email, Long tripId);
     Set<Integer> findAllOccupiedSeatsByTripId(Long tripId);
-    List<Integer> findAllSeatsByTripIds(Iterable<Long> tripIds);
+    Map<Long, Integer> findAllSeatsByTripIds(Iterable<Long> tripIds);
 }

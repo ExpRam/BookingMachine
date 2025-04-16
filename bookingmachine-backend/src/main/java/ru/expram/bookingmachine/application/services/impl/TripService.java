@@ -1,6 +1,7 @@
 package ru.expram.bookingmachine.application.services.impl;
 
 import lombok.AllArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import ru.expram.bookingmachine.application.dtos.base.TripDTO;
 import ru.expram.bookingmachine.application.dtos.base.TripExtendedDTO;
 import ru.expram.bookingmachine.application.dtos.get.BaseSearchRequest;
@@ -14,85 +15,90 @@ import ru.expram.bookingmachine.domain.models.Trip;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.IntStream;
+import java.util.concurrent.CompletableFuture;
 
 @AllArgsConstructor
 public class TripService implements ITripService {
 
-    private final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    private final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
 
     private final ITripDTOMapper tripDTOMapper;
     private final ITripRepository tripRepository;
     private final IBookingRepository bookingRepository;
 
-    private List<TripExtendedDTO> getTripsWithSeats(List<Trip> trips) {
+    // Protected cuz Async annotation creates proxy to this method
+    @Async
+    protected CompletableFuture<List<TripExtendedDTO>> getTripsWithSeats(List<Trip> trips) {
         List<Long> tripIds = trips.stream().map(Trip::getId).toList();
 
-        List<Integer> occupiedSeats = bookingRepository.findAllSeatsByTripIds(tripIds);
+        Map<Long, Integer> occupiedSeats = bookingRepository.findAllSeatsByTripIds(tripIds);
+        List<TripExtendedDTO> result = trips.stream()
+                .map(trip -> {
+                    // Calculating available seats from occupiedSeats map
+                    final int occupied = occupiedSeats.getOrDefault(trip.getId(), 0);
+                    final int available = trip.getMaxSeats() - occupied;
 
-        return IntStream.range(0, trips.size())
-                .mapToObj(i -> {
-                    Trip trip = trips.get(i);
-                    return tripDTOMapper.toTripExtendedDTO(
-                            trip,
-                            (trip.getMaxSeats() - occupiedSeats.get(i))
-                    );
-                }).toList();
+                    return tripDTOMapper.toTripExtendedDTO(trip, available);
+                })
+                .toList();
+
+        return CompletableFuture.completedFuture(
+            result
+        );
     }
 
     @Override
-    public List<TripExtendedDTO> getAllTrips() {
-        return getTripsWithSeats(tripRepository.getTrips());
+    @Async
+    public CompletableFuture<List<TripExtendedDTO>> getAllTrips() {
+        // `Supply` cuz completedFuture does not support thenCompose
+        return CompletableFuture.supplyAsync(tripRepository::getTrips).thenCompose(this::getTripsWithSeats);
     }
 
     @Override
-    public List<TripExtendedDTO> getTripsByFilter(BaseSearchRequest request) {
-        return getTripsWithSeats(tripRepository.findTripsByBaseParams(request));
+    public CompletableFuture<List<TripExtendedDTO>> getTripsByFilter(BaseSearchRequest request) {
+        return CompletableFuture.supplyAsync(() -> tripRepository.findTripsByBaseParams(request)).thenCompose(this::getTripsWithSeats);
     }
 
     @Override
-    public HashMap<String, HashMap<String, List<TripExtendedDTO>>> getGroupedTrips(BaseSearchRequest request) {
+    public CompletableFuture<HashMap<String, HashMap<String, List<TripExtendedDTO>>>> getGroupedTrips(BaseSearchRequest request) {
         // Getting all trips that passed all filters
-        final List<TripExtendedDTO> tripDTOs = this.getTripsByFilter(request);
+        return this.getTripsByFilter(request).thenApplyAsync(extendedTrips -> {
+            // Then grouping them by departureTime
+            final HashMap<String, HashMap<String, List<TripExtendedDTO>>> groupedTrips = new LinkedHashMap<>();
 
-        // Then grouping them by departureTime
-        final HashMap<String, HashMap<String, List<TripExtendedDTO>>> groupedTrips = new LinkedHashMap<>();
+            extendedTrips.forEach(trip -> {
+                final LocalDateTime departureTime = trip.departureTime();
 
-        tripDTOs.forEach(trip -> {
-            final LocalDateTime departureTime = trip.departureTime();
+                // Collecting date and time then forming grouped map
+                final String date = departureTime.format(DATE_FORMAT);
+                final String time = departureTime.format(TIME_FORMAT);
 
-            final String date = departureTime.format(DATE_FORMAT);
-            final String time = departureTime.format(TIME_FORMAT);
+                groupedTrips
+                        .computeIfAbsent(date, timeHash -> new LinkedHashMap<>())
+                        .computeIfAbsent(time, trips -> new ArrayList<>()).add(trip);
+            });
 
-            final var timeGroupedTrips
-                    = groupedTrips.computeIfAbsent(date, timeHash -> new LinkedHashMap<>());
-
-            timeGroupedTrips.computeIfAbsent(time, trips -> new ArrayList<>()).add(trip);
+            return groupedTrips;
         });
-
-        return groupedTrips;
     }
 
     @Override
-    public Set<Integer> getAvailableSeats(Long tripId) {
+    public CompletableFuture<Set<Integer>> getAvailableSeats(Long tripId) {
+        // Search trip. If not found then throw exception
         final Optional<Trip> tripOptional = tripRepository.findTripById(tripId);
+        final Trip trip = tripOptional.orElseThrow(() -> new TripNotFoundException(tripId));
 
-        if(tripOptional.isEmpty())
-            throw new TripNotFoundException(tripId);
-
-        final Trip trip = tripOptional.get();
-        return trip.getAvailableSeats(bookingRepository.findAllOccupiedSeatsByTripId(trip.getId()));
+        return CompletableFuture.completedFuture(
+                trip.getAvailableSeats(bookingRepository.findAllOccupiedSeatsByTripId(trip.getId()))
+        );
     }
 
     @Override
-    public TripDTO getTripById(Long tripId) {
+    public CompletableFuture<TripDTO> getTripById(Long tripId) {
         final Optional<Trip> tripOptional = tripRepository.findTripById(tripId);
+        final Trip trip = tripOptional.orElseThrow(() -> new TripNotFoundException(tripId));
 
-        if(tripOptional.isEmpty())
-            throw new TripNotFoundException(tripId);
-
-        final Trip trip = tripOptional.get();
-        return tripDTOMapper.toTripDTO(trip);
+        return CompletableFuture.completedFuture(tripDTOMapper.toTripDTO(trip));
     }
 }

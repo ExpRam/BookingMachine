@@ -5,8 +5,10 @@ import ru.expram.bookingmachine.application.dtos.delete.RefundBookingRequest;
 import ru.expram.bookingmachine.application.dtos.delete.RefundBookingResponse;
 import ru.expram.bookingmachine.application.dtos.post.TakeBookingRequest;
 
+import java.util.concurrent.CompletableFuture;
+
 public interface IBookingService {
 
-    BookingDTO takeBooking(TakeBookingRequest request);
-    RefundBookingResponse refundBooking(RefundBookingRequest request);
+    CompletableFuture<BookingDTO> takeBooking(TakeBookingRequest request);
+    CompletableFuture<RefundBookingResponse> refundBooking(RefundBookingRequest request);
 }
