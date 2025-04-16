@@ -9,7 +9,6 @@ import ru.expram.bookingmachine.infrastructure.database.projections.TripWithOccu
 import ru.expram.bookingmachine.infrastructure.entities.BookingEntity;
 import ru.expram.bookingmachine.infrastructure.mapper.BookingMapper;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;

@@ -13,7 +13,10 @@ import ru.expram.bookingmachine.application.dtos.delete.RefundBookingRequest;
 import ru.expram.bookingmachine.application.dtos.delete.RefundBookingResponse;
 import ru.expram.bookingmachine.application.dtos.post.TakeBookingRequest;
 import ru.expram.bookingmachine.application.exceptions.EmailAlreadyOnTripException;
+import ru.expram.bookingmachine.application.exceptions.NoSeatsForTripException;
+import ru.expram.bookingmachine.application.exceptions.SeatAlreadyTakenException;
 import ru.expram.bookingmachine.application.exceptions.TripNotFoundException;
+import ru.expram.bookingmachine.application.factories.BookingFactory;
 import ru.expram.bookingmachine.application.mapper.IBookingDTOMapper;
 import ru.expram.bookingmachine.application.repositories.IBookingRepository;
 import ru.expram.bookingmachine.application.repositories.ITripRepository;
@@ -69,7 +72,7 @@ class BookingServiceTest {
                 .route(route)
                 .departureTime(LocalDateTime.of(2025, 1, 15, 13, 0))
                 .arrivalTime(LocalDateTime.of(2025, 1, 15, 17, 0))
-                .maxSeats(40)
+                .maxSeats(10)
                 .price(10000d)
                 .build();
 
@@ -92,7 +95,7 @@ class BookingServiceTest {
 
     @Test
     void takeBooking_ShouldCreateBooking_WhenValidRequest() throws ExecutionException, InterruptedException {
-        TakeBookingRequest request = new TakeBookingRequest(1L, "Andrey", "Vasilyev", "andrey@test.com", 20);
+        TakeBookingRequest request = new TakeBookingRequest(1L, "Andrey", "Vasilyev", "andrey@test.com", 5);
 
         when(tripRepository.findTripById(1L)).thenReturn(Optional.of(trip));
         when(bookingRepository.existsByEmailAndTripId("andrey@test.com", 1L)).thenReturn(false);
@@ -127,6 +130,29 @@ class BookingServiceTest {
 
         assertThrows(TripNotFoundException.class, () -> bookingService.takeBooking(request));
     }
+
+    @Test
+    void takeBooking_ShouldThrowNoSeatsForTripException_WhenNoSeatsAvailable() {
+        TakeBookingRequest request = new TakeBookingRequest(1L, "Andrey", "Vasilyev", "andrey@test.com", 5);
+
+        when(tripRepository.findTripById(1L)).thenReturn(Optional.of(trip));
+        when(bookingRepository.existsByEmailAndTripId("andrey@test.com", 1L)).thenReturn(false);
+        when(bookingRepository.findAllOccupiedSeatsByTripId(1L)).thenReturn(Set.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+
+        assertThrows(NoSeatsForTripException.class, () -> bookingService.takeBooking(request));
+    }
+
+    @Test
+    void takeBooking_ShouldThrowSeatAlreadyTakenException_WhenSeatIsOccupied() {
+        TakeBookingRequest request = new TakeBookingRequest(1L, "Andrey", "Vasilyev", "andrey@test.com", 4);
+
+        when(tripRepository.findTripById(1L)).thenReturn(Optional.of(trip));
+        when(bookingRepository.existsByEmailAndTripId("andrey@test.com", 1L)).thenReturn(false);
+        when(bookingRepository.findAllOccupiedSeatsByTripId(1L)).thenReturn(Set.of(1, 2, 3, 4, 5, 6));
+
+        assertThrows(SeatAlreadyTakenException.class, () -> bookingService.takeBooking(request));
+    }
+
 
     @Test
     void refundBooking_ShouldReturnTrue_WhenRefundCodeExists() throws ExecutionException, InterruptedException {

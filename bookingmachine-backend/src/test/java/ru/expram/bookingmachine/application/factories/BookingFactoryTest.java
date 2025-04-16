@@ -58,20 +58,6 @@ class BookingFactoryTest {
     }
 
     @Test
-    void create_ShouldThrowNoSeatsForTripException_WhenNoSeatsAvailable() {
-        Set<Integer> availableSeats = Set.of();
-
-        assertThrows(NoSeatsForTripException.class, () -> BookingFactory.create(trip, availableSeats, request));
-    }
-
-    @Test
-    void create_ShouldThrowSeatAlreadyTakenException_WhenSeatIsOccupied() {
-        Set<Integer> availableSeats = Set.of(1, 3, 4, 5);
-
-        assertThrows(SeatAlreadyTakenException.class, () -> BookingFactory.create(trip, availableSeats, request));
-    }
-
-    @Test
     void create_ShouldThrowInvalidEmailException_WhenEmailIsInvalid() {
         TakeBookingRequest invalidRequest = new TakeBookingRequest(1L, "Andrey", "Vasilyev", "andreytestru", 2);;
 
